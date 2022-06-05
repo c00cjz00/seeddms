@@ -1,0 +1,44 @@
+version: '3.8'
+
+networks:
+    c00cjz00-default-network:
+      external: true
+
+services:
+  c00cjz00-seeddms-db:
+    #image: mariadb
+    image: mysql:5.7.38
+    container_name: c00cjz00-seeddms-db
+    user: root
+    networks:
+      - c00cjz00-default-network
+    #ports:
+    #  - "33060:3306"      
+    environment:
+      - MYSQL_ROOT_PASSWORD=c00cjz00
+      - MYSQL_DATABASE=seeddms
+      - MYSQL_USER=seeddms
+      - MYSQL_PASSWORD=seeddms4c00cjz00
+    volumes:
+      - ./data/var/lib/mysql:/var/lib/mysql
+      
+  c00cjz00-seeddms:
+    image: c00cjz00/seeddms:5.1.25
+    container_name:  c00cjz00-seeddms
+    networks:
+      - c00cjz00-default-network
+    environment:      
+      - TZ=Asia/Taipei
+      - CRON_INDEX='0 0 * * *'
+      - CRON_BACKUP='0 23 * * *'
+      - SSL_PORT=443
+      - ORCE_SSL=1
+    links:
+      - c00cjz00-seeddms-db:seeddms-db
+    ports:
+      - "8880:80"
+      - "8843:443"
+    depends_on:
+      - c00cjz00-seeddms-db
+    volumes:
+      - ./webSite/:/var/www
